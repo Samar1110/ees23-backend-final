@@ -118,6 +118,7 @@ class UserInitApi(generics.GenericAPIView):
         response = Response(data=user_get_me(user=UserAcount.objects.get(email=email)))
         return response
 
+
 class LogoutView(generics.GenericAPIView):
 
     permission_classes = (permissions.IsAuthenticated,)
@@ -127,6 +128,29 @@ class LogoutView(generics.GenericAPIView):
         request.user.auth_token.delete()
         logout(request)
         return Response(status=status.HTTP_200_OK)
+
+
+class UpdateApi(generics.GenericAPIView):
+
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = InputSerializer
+    def patch(self, request, id):
+        try:
+            user = UserAcount.objects.get(id=id)
+            print(user)
+            print("hi")
+            user.name = request.data['name']
+            user.college_name = request.data['college_name']
+            user.phone_number = request.data['phone_number']
+            user.year = request.data['year']
+            user.save() ;
+            return Response(
+                {"success": "User Account successfully updated"}, status=status.HTTP_200_OK
+            )
+        except UserAcount.DoesNotExist:
+            return Response(
+                {"error": "User account not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
   
 

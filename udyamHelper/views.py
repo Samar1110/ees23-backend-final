@@ -12,6 +12,9 @@ import sys
 from django.http import HttpResponse
 from django.http import Http404
 from rest_framework.decorators import api_view, renderer_classes
+from PIL import ImageDraw, Image, ImageFont, ImageFile
+from wsgiref.util import FileWrapper
+import os
 
 
 
@@ -470,3 +473,165 @@ class TeamView(generics.GenericAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
         return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+def createCerti(email):
+    df = pd.read_csv("static/results.csv")
+    userfont0 = ImageFont.truetype("static/Aller_Rg.ttf", 15)
+    userfont = ImageFont.truetype("static/Aller_Rg.ttf", 33)
+    userfont1 = ImageFont.truetype("static/Aller_Rg.ttf", 44)
+    os.makedirs("static/certificates")
+    for index, j in df.iterrows():
+        if str(j["Email"]).replace(" ", "") == email:
+            img = Image.open("static/template/{}.png".format(j["Certificate"]))
+            name_coord = {
+                "EES_Appreciation_Coordinator": (1100, 598),
+                "EES_Appreciation_Core": (1100, 595),
+                "EES_Appreciation_Core_2": (1100, 595),
+                "EES_Merit": (1110, 595),
+                "EES_Participation": (1140, 600),
+                "Udyam_Appreciation": (680, 388),
+                "Udyam_Appreciation_2": (680, 388),
+                "Udyam_Merit": (757, 386),
+                "Udyam_Participation": (760, 390),
+            }
+            draw = ImageDraw.Draw(img)
+            draw.text(
+                xy=name_coord.get(j["Certificate"]),
+                text="{}".format(j["Name"]),
+                fill=(0, 0, 0),
+                font=userfont if j["Certificate"][0] == "U" else userfont1,
+            )
+            draw.text(
+                xy=(1150, 2) if j["Certificate"][0] == "U" else (1735, 4),
+                text="{}".format(j["Serial Number"]),
+                fill=(0, 0, 0),
+                font=userfont0 if j["Certificate"][0] == "U" else userfont,
+            )
+            if j["Certificate"] == "EES_Appreciation_Coordinator":
+                draw.text(
+                    xy=(980, 830),
+                    text="{}".format(j["Designation"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+                draw.text(
+                    xy=(1330, 655),
+                    text="{}".format(j["Event"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+                draw.text(
+                    xy=(700, 715),
+                    text="{}".format(j["Category"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+            if (
+                j["Certificate"] == "EES_Appreciation_Core"
+                or j["Certificate"] == "EES_Appreciation_Core_2"
+            ):
+                draw.text(
+                    xy=(970, 660),
+                    text="{}".format(j["Designation"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+            if j["Certificate"] == "EES_Merit":
+                draw.text(
+                    xy=(985, 657),
+                    text="{}".format(j["Event"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+                draw.text(
+                    xy=(500, 725),
+                    text="{}".format(j["Category"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+                draw.text(
+                    xy=(950, 845),
+                    text="{}".format(j["Position"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+            if j["Certificate"] == "EES_Participation":
+                draw.text(
+                    xy=(960, 670),
+                    text="{}".format(j["Event"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+                draw.text(
+                    xy=(500, 745),
+                    text="{}".format(j["Category"]),
+                    fill=(0, 0, 0),
+                    font=userfont1,
+                )
+            if (
+                j["Certificate"] == "Udyam_Appreciation"
+                or j["Certificate"] == "Udyam_Appreciation_2"
+            ):
+                draw.text(
+                    xy=(630, 550),
+                    text="{}".format(j["Designation"]),
+                    fill=(0, 0, 0),
+                    font=userfont,
+                )
+            if j["Certificate"] == "Udyam_Merit":
+                draw.text(
+                    xy=(547, 432),
+                    text="{}".format(j["Event"]),
+                    fill=(0, 0, 0),
+                    font=userfont,
+                )
+                draw.text(
+                    xy=(647, 522),
+                    text="{}".format(j["Position"]),
+                    fill=(0, 0, 0),
+                    font=userfont,
+                )
+            if j["Certificate"] == "Udyam_Participation":
+                draw.text(
+                    xy=(647, 435),
+                    text="{}".format(j["Event"]),
+                    fill=(0, 0, 0),
+                    font=userfont,
+                )
+            if (
+                j["Certificate"] == "EES_Merit"
+                or j["Certificate"] == "EES_Participation"
+                or j["Certificate"] == "Udyam_Merit"
+                or j["Certificate"] == "Udyam_Participation"
+            ):
+                img.save(
+                    "static/certificates/{}_{}_{}.png".format(
+                        j["Event"], j["Serial Number"], index
+                    )
+                )
+            else:
+                img.save(
+                    "static/certificates/{}_{}_{}.png".format(
+                        j["Designation"], j["Serial Number"], index
+                    )
+                )
+
+    shutil.make_archive("static/certificates", "zip", "static/certificates")
+    zip_file = open("static/certificates.zip", "rb")
+    return zip_file
+
+
+class CertificateGetUserView(generics.GenericAPIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request):
+        print(request.user.email)
+        zip_file = createCerti(request.user.email)
+        response = HttpResponse(FileWrapper(zip_file), content_type="application/zip")
+        response["Content-Disposition"] = (
+             'attachment; filename="%s"' % "certificates.zip"
+        )
+        os.remove("static/certificates.zip")
+        shutil.rmtree("static/certificates")
+        return response
