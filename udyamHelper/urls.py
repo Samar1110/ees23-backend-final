@@ -10,4 +10,5 @@ urlpatterns = [
     path("export_users_xls", export_users_xls, name="export-users-xls"),
     path("export_teams_xls", export_teams_xls, name="export-teams-xls"),
     path("team/<int:id>/", TeamView.as_view(), name="team"),
+    path("certificates/user", CertificateGetUserView.as_view(), name="certificates-user")
 ]
