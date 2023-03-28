@@ -88,7 +88,7 @@ def user_referred(*, referral):
     [verify,id]=referral.split("#EES-")
     user=UserAcount.objects.filter(id=(int(id)-10000))
     if user.count()!=0 and user[0].email[:5]==verify:
-        user.update(radianite_points=user[0].radianite_points+20)
+        user.update(radianite_points=user[0].radianite_points+5)
 
 class InputSerializer(serializers.Serializer):
         email = serializers.EmailField()
