@@ -137,8 +137,13 @@ class UpdateApi(generics.GenericAPIView):
     def patch(self, request, id):
         try:
             user = UserAcount.objects.get(id=id)
-            print(user)
-            print("hi")
+            serializer = self.serializer_class(data = request.data)
+            if not serializer.is_valid():
+                error = {"data":userData}
+                for err in serializer.errors:
+                    error[err] = serializer.errors[err][0]
+                return Response(error, status=status.HTTP_409_CONFLICT)
+                
             user.name = request.data['name']
             user.college_name = request.data['college_name']
             user.phone_number = request.data['phone_number']
