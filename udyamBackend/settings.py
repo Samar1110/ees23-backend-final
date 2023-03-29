@@ -1,5 +1,8 @@
 import os
 import mimetypes
+import pyAesCrypt
+# from decouple import config
+# from celery.schedules import crontab
 
 mimetypes.add_type("text/css", ".css", True)
 
@@ -127,6 +130,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

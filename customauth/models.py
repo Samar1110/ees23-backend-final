@@ -4,7 +4,7 @@ import re
 from django.utils import timezone
 from rest_framework import permissions
 from ckeditor_uploader.fields import RichTextUploadingField
-# from django.contrib.auth import Group
+
 
 def isValid(s):
     Pattern = re.compile("(0|91)?[6-9][0-9]{9}")
