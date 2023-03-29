@@ -1,5 +1,8 @@
 import os
 import mimetypes
+import pyAesCrypt
+# from decouple import config
+# from celery.schedules import crontab
 
 mimetypes.add_type("text/css", ".css", True)
 
@@ -128,6 +131,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
@@ -138,6 +142,8 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 BASE_URL_FRONTEND = os.environ.get("BASE_URL_FRONTEND")
+SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
+SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE")
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"

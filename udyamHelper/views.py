@@ -15,7 +15,16 @@ from rest_framework.decorators import api_view, renderer_classes
 from PIL import ImageDraw, Image, ImageFont, ImageFile
 from wsgiref.util import FileWrapper
 import os
-
+import pickle
+import pyAesCrypt
+from decouple import config
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google.auth.transport.requests import Request
+from customauth.models import UserAcount
+from pathlib import Path
+from customauth.views import populate_googlesheet_with_team_data,populate_googlesheet_with_eventTeam_data,populate_googlesheet_with_collegteam_data
 
 
 class InputSerializer(serializers.Serializer):
@@ -124,6 +133,9 @@ class TeamCreateView(generics.GenericAPIView):
         if message:
             return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
         serializer.save()
+        populate_googlesheet_with_team_data()
+        populate_googlesheet_with_eventTeam_data()
+        populate_googlesheet_with_collegteam_data()
         team = Team.objects.get(
             teamname=request.data["teamname"],
             event=Event.objects.get(event=request.data["event"]),
@@ -135,7 +147,6 @@ class TeamCreateView(generics.GenericAPIView):
             "member1": team.member1.email if team.member1 else None,
             "member2": team.member2.email if team.member2 else None,
         }
-
         return Response(team_info, status=status.HTTP_200_OK)
 
 class TeamCountView(generics.GenericAPIView):
@@ -201,93 +212,104 @@ class TeamGetUserView(generics.ListAPIView):
             return Response(
                 {"error": "No such user exists"}, status=status.HTTP_404_NOT_FOUND
             )
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
+# bufferSize = 64 * 1024
+# password = config('SERVICE_ACCOUNT_DECRYPT_KEY')
+# spreadsheet_id = config('SPREADSHEET_ID',default="1c2dfhdeDRaa-i369P6wvMVA8vWmsvuSn_zLlM01VxYc")
 
+# def decrypt_file(filename):
+#     with open(os.path.join(BASE_DIR, f"{filename}.aes"), "rb") as encrypted_file:
+#         with open(os.path.join(BASE_DIR, filename), "wb") as decrypted_file:
+#             encFileSize = os.stat(os.path.join(BASE_DIR, f"{filename}.aes")).st_size
+#             # decrypt file stream
+#             pyAesCrypt.decryptStream(
+#                 encrypted_file,
+#                 decrypted_file,
+#                 password,
+#                 bufferSize,
+#                 encFileSize
+#             )
 
-@api_view(('GET',))
-def export_users_xls(request):
-    if not request.user.has_perm("view_useracount") :
-        raise Http404
-    
-    response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="UserAccounts.xls"'
+# def encrypt_file(filename):
+#     with open(os.path.join(BASE_DIR, filename), "rb") as decrypted_file:
+#         with open(os.path.join(BASE_DIR, f"{filename}.aes"), "wb") as encrypted_file:
+#             pyAesCrypt.encryptStream(decrypted_file, encrypted_file, password, bufferSize)
+            
+# class UsersSheet:
+#     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-    wb = xlwt.Workbook(encoding="utf-8")
-    ws = wb.add_sheet("User Accounts")
+#     RANGE_NAME = 'Registration'
+#     value_input_option = 'USER_ENTERED'
 
-    # Sheet header, first row
-    row_num = 0
+#     creds = None
+       
+#     service_account_file = 'excelsheet-381920-4c0c0a0a6e7a.json'
+#     creds = None
+#     creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=SCOPES)
+#     service = build('sheets', 'v4', credentials=creds)
+#     sheet = service.spreadsheets()
 
-    font_style = xlwt.XFStyle()
-    font_style.font.bold = True
+#     @classmethod
+#     def get_user_row(cls, user):
+#         result = cls.sheet.values().get(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME).execute()
+#         rows = result.get('values', [])
+#         for i in  range(len(rows)):
+#             if rows[i][1] == user.email:
+#                 return i+1
+#         return len(rows)+1
 
-    columns = ["Name", "Email", "Year", "College", "Radianite Points"]
+#     @classmethod
+#     def get_user_data(cls,user):
+#         row=[]
+#         try:
+#             row.append(user.name)
+#             row.append(user.email)
+#             row.append(user.year)
+#             row.append(user.college_name)
+#             row.append(user.radianite_points)
+#         except:
+#             for i in range(5): row.append("")
 
-    for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style)
+#         row.append("Yes" if user.is_active else "No")
+#         return row
 
-    # Sheet body, remaining rows
-    font_style = xlwt.XFStyle()
+#     @classmethod
+#     def initialize_spreadsheet(cls):
+#         values = []
+#         for user in UserAcount.objects.all().order_by('id'):
+#             values.append(cls.get_user_data(user))
 
-    rows = UserAcount.objects.all().values_list(
-        "name", "email", "year", "college_name", "radianite_points"
-    )
-    for row in rows:
-        row_num += 1
-        for col_num in range(len(row)):
-            ws.write(row_num, col_num, row[col_num], font_style)
+#         body = {
+#             'values': values
+#         }
+#         result = cls.service.spreadsheets().values().clear(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME+"!A2:O10000").execute()
+#         result = cls.service.spreadsheets().values().append(
+#             spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME, valueInputOption=cls.value_input_option, body=body).execute()
 
-    wb.save(response)
-    return response
+#     @classmethod
+#     def update_user(cls, email):
+#         user=UserAcount.objects.get(email=email)
+#         row = cls.get_user_row(user)
+#         values = [cls.get_user_data(user)]
+#         body = {
+#             'values': values
+#         }
+#         result = cls.service.spreadsheets().values().update(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME+f"!A{row}", valueInputOption=cls.value_input_option, body=body).execute()
 
+#     @classmethod
+#     def new_user(cls, user):
+#         values = [cls.get_user_data(user)]
+#         body = {
+#             'values': values
+#         }
+#         result = cls.service.spreadsheets().values().append(
+#             spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME, valueInputOption=cls.value_input_option, body=body).execute()
 
-
-@api_view(('GET',))
-def export_teams_xls(request):
-    if not request.user.has_perm("view_useracount") :
-        raise Http404
-
-    # print(request.user)
-    response = HttpResponse(content_type="application/ms-excel")
-    response["Content-Disposition"] = 'attachment; filename="Teams.xls"'
-
-    wb = xlwt.Workbook(encoding="utf-8")
-    ws = wb.add_sheet("Teams")
-
-    # Sheet header, first row
-    row_num = 0
-
-    font_style = xlwt.XFStyle()
-    font_style.font.bold = True
-
-    columns = ["Team Event", "Team Name", "Leader Name","Leader Email","Leader Phone Number", "Member1 Name", "Member1 Email", "Member1 Phone Number", "Member2 Name", "Member2 Email", "Member2 Phone Number"]
-
-    for col_num in range(len(columns)):
-        ws.write(row_num, col_num, columns[col_num], font_style)
-
-    # Sheet body, remaining rows
-    font_style = xlwt.XFStyle()
-
-    rows = []
-    for team in Team.objects.order_by("-event"):
-        rows.append(
-            [team.event.event, team.teamname, team.leader.name, team.leader.email, team.leader.phone_number, team.member1.name if(team.member1) else " ", team.member1.email if(team.member1) else " ", team.member1.phone_number if(team.member1) else " ", team.member2.name if(team.member2) else " ", team.member2.email if(team.member2) else " ", team.member2.phone_number if(team.member2) else " "]
-        )
-
-    for row in rows:
-        row_num += 1
-        for col_num in range(len(row)):
-            ws.write(row_num, col_num, row[col_num], font_style)
-
-    wb.save(response)
-    return response
 
 
 def checks2(request):
     try:
-        # teamname=request.data["teamname"]
-        
-        # print(request.data)
         event = Event.objects.get(event=request.data["event"])
         leader = UserAcount.objects.get(email=request.data["leader"])
         try:
@@ -306,12 +328,6 @@ def checks2(request):
             if request.data["member2"]
             else None
         )
-        # print(event)
-        # print(teamname)
-        # print(request.data["teamname"])
-        # print(leader)
-        # print(member1)
-        # print(member2)
 
         event_teams = Team.objects.filter(event=event)
         first_yearites = 0
@@ -423,17 +439,16 @@ class TeamView(generics.GenericAPIView):
                 if request.data["member2"] != ""
                 else None
             )
-            # print("HEllo1")
+            
             message = checks2(request)
-            # print("HEllo2")
          
             if message and message != "Team name already taken":
                 return Response({"error": message}, status=status.HTTP_403_FORBIDDEN)
-            # print("HEllo3")
             team.save()
-            # print("HEllo7")
+            populate_googlesheet_with_team_data()
+            populate_googlesheet_with_eventTeam_data()
+            populate_googlesheet_with_collegteam_data()
             serializer = self.get_serializer(data=request.data)
-            # print("HEllo8")
             serializer.is_valid(raise_exception=False)
             team_info = {
             "teamname": team.teamname,
@@ -442,10 +457,8 @@ class TeamView(generics.GenericAPIView):
             "member1": team.member1.email if team.member1 else None,
             "member2": team.member2.email if team.member2 else None,
             }
-            # print("HEllo4")
             return Response(team_info, status=status.HTTP_200_OK)
         except Team.DoesNotExist:
-            # print("HEllo5")
             return Response(
                 {"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND
             )

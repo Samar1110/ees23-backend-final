@@ -3,8 +3,6 @@ from rest_framework import serializers, generics, status
 from rest_framework.response import Response
 from .models import UserAcount
 from rest_framework import permissions
-# from django.conf import settings
-# from django.http import HttpResponse
 import xlwt
 import pandas as pd
 import shutil
@@ -13,7 +11,7 @@ from django.http import Http404
 from django.core.mail import EmailMessage
 from django.core.exceptions import ValidationError
 from typing import Tuple
-from udyamBackend.settings import CLIENT_ID, CLIENT_SECRET
+from udyamBackend.settings import CLIENT_ID, CLIENT_SECRET, SPREADSHEET_ID, SERVICE_ACCOUNT_FILE
 import requests
 from django.core.mail import send_mail,EmailMultiAlternatives
 from .models import BroadCast_Email
@@ -23,6 +21,10 @@ from.forms import PostForm
 from django.http import HttpResponseRedirect
 from django.contrib.auth import login, logout
 from rest_framework.authtoken.models import Token
+from decouple import config
+from googleapiclient.discovery import build
+from google.oauth2 import service_account
+from udyamHelper.models import Team, Event
 from django.core.validators import RegexValidator
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
@@ -58,6 +60,7 @@ def user_create(email, **extra_field) -> UserAcount:
 
     user = UserAcount(email=email, **extra_fields)
     user.save()
+    populate_googlesheet_with_user_data() 
     return user
 
 
@@ -217,7 +220,6 @@ def index(request):
             form.save()
             subject=request.POST['subject']
             created=request.POST['created']
-            # return HttpResponseRedirect('/thanks/')
     elif request.user.has_perm("view_broadcast_email"):
 
         form = PostForm()
@@ -226,3 +228,119 @@ def index(request):
         return HttpResponse("Invalid request")
 
     return render(request, 'index.html',{'form':form,'subject':subject,'created':created})
+
+def populate_googlesheet_with_user_data() :
+    """Populate Googlesheet with the coin data from the database."""
+    scopes = ['https://www.googleapis.com/auth/spreadsheets']
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
+    creds = None
+    creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
+    service = build('sheets', 'v4', credentials=creds)
+    sheet = service.spreadsheets()
+
+
+    user_queryset = UserAcount.objects.all().order_by('id')
+    data: list[any] = []
+
+
+    for user in user_queryset:
+        data.append(
+            [
+                user.name,
+                user.email,
+                user.year,
+                user.college_name,
+                user.radianite_points,
+            ]
+        )
+
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range='A2:F').execute()
+    sheet.values().append(
+        spreadsheetId=spreadsheet_id, range='USERDATA!A2:F2', valueInputOption='USER_ENTERED', body={'values': data}
+    ).execute()
+    
+def populate_googlesheet_with_team_data() :
+    """Populate Googlesheet with the coin data from the database."""
+    scopes = ['https://www.googleapis.com/auth/spreadsheets']
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
+    creds = None
+    creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
+    service = build('sheets', 'v4', credentials=creds)
+    sheet = service.spreadsheets()
+
+
+    team_queryset = Team.objects.order_by("-event")
+    data: list[any] = []
+
+
+    for team in team_queryset:
+        data.append(
+            [
+                team.event.event,
+                team.teamname,
+                team.leader.name, 
+                team.leader.email, 
+                team.leader.phone_number, 
+                team.member1.name if(team.member1) else " ", 
+                team.member1.email if(team.member1) else " ", 
+                team.member1.phone_number if(team.member1) else " ", 
+                team.member2.name if(team.member2) else " ", 
+                team.member2.email if(team.member2) else " ", 
+                team.member2.phone_number if(team.member2) else " ",
+            ]
+        )
+
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range='A2:K').execute()
+    sheet.values().append(
+        spreadsheetId=spreadsheet_id, range='TEAMDATA!A2:K2', valueInputOption='USER_ENTERED', body={'values': data}
+    ).execute()
+    
+def populate_googlesheet_with_collegteam_data() :
+    """Populate Googlesheet with the coin data from the database."""
+    scopes = ['https://www.googleapis.com/auth/spreadsheets']
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
+    creds = None
+    creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
+    service = build('sheets', 'v4', credentials=creds)
+    sheet = service.spreadsheets()
+
+    data: list[any] = []
+    college_team = {}
+    teamObj=Team.objects.all()
+    for x in teamObj:
+        # print(x)
+        if(x.leader.college_name in college_team.keys()):
+            college_team[x.leader.college_name]+=1
+        else:
+            college_team[x.leader.college_name]=1
+    
+    for x in college_team.keys():
+        # print(x)
+        data.append([x,college_team[x]])
+
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range='A2:B').execute()
+    sheet.values().append(
+        spreadsheetId=spreadsheet_id, range='COLLEGE-TEAMCOUNT!A2:B2', valueInputOption='USER_ENTERED', body={'values': data}
+    ).execute()
+    
+def populate_googlesheet_with_eventTeam_data() :
+    """Populate Googlesheet with the coin data from the database."""
+    scopes = ['https://www.googleapis.com/auth/spreadsheets']
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
+    creds = None
+    creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
+    service = build('sheets', 'v4', credentials=creds)
+    sheet = service.spreadsheets()
+    
+    data: list[any] = []
+    for event in Event.objects.all():
+        data.append([event.event,Team.objects.filter(event=event).count()])
+        
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range='A2:B').execute()
+    sheet.values().append(
+        spreadsheetId=spreadsheet_id, range='EVENT-TEAMCOUNT!A2:B2', valueInputOption='USER_ENTERED', body={'values': data}
+    ).execute()

@@ -1,3 +1,5 @@
+*.json.aes
+*.json
 
 # Created by https://www.gitignore.io/api/venv,dotenv,django,python,virtualenv,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=venv,dotenv,django,python,virtualenv,visualstudiocode
