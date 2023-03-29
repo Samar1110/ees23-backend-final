@@ -1,6 +1,5 @@
-client_secret.json.aes
-client_secret.json
-excelsheet-381920-4c0c0a0a6e7a.json
+*.json.aes
+*.json
 
 # Created by https://www.gitignore.io/api/venv,dotenv,django,python,virtualenv,visualstudiocode
 # Edit at https://www.gitignore.io/?templates=venv,dotenv,django,python,virtualenv,visualstudiocode

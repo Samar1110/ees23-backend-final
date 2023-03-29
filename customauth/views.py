@@ -11,7 +11,7 @@ from django.http import Http404
 from django.core.mail import EmailMessage
 from django.core.exceptions import ValidationError
 from typing import Tuple
-from udyamBackend.settings import CLIENT_ID, CLIENT_SECRET
+from udyamBackend.settings import CLIENT_ID, CLIENT_SECRET, SPREADSHEET_ID, SERVICE_ACCOUNT_FILE
 import requests
 from django.core.mail import send_mail,EmailMultiAlternatives
 from .models import BroadCast_Email
@@ -232,8 +232,8 @@ def index(request):
 def populate_googlesheet_with_user_data() :
     """Populate Googlesheet with the coin data from the database."""
     scopes = ['https://www.googleapis.com/auth/spreadsheets']
-    spreadsheet_id = config('SPREADSHEET_ID', default='1cLNkflUYzDkkHg02qF1oQ3ons-T41g8E4JRKEb4HCWE')
-    service_account_file = 'excelsheet-381920-4c0c0a0a6e7a.json'
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
     creds = None
     creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
     service = build('sheets', 'v4', credentials=creds)
@@ -263,8 +263,8 @@ def populate_googlesheet_with_user_data() :
 def populate_googlesheet_with_team_data() :
     """Populate Googlesheet with the coin data from the database."""
     scopes = ['https://www.googleapis.com/auth/spreadsheets']
-    spreadsheet_id = config('SPREADSHEET_ID', default='1cLNkflUYzDkkHg02qF1oQ3ons-T41g8E4JRKEb4HCWE')
-    service_account_file = 'excelsheet-381920-4c0c0a0a6e7a.json'
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
     creds = None
     creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
     service = build('sheets', 'v4', credentials=creds)
@@ -300,8 +300,8 @@ def populate_googlesheet_with_team_data() :
 def populate_googlesheet_with_collegteam_data() :
     """Populate Googlesheet with the coin data from the database."""
     scopes = ['https://www.googleapis.com/auth/spreadsheets']
-    spreadsheet_id = config('SPREADSHEET_ID', default='1cLNkflUYzDkkHg02qF1oQ3ons-T41g8E4JRKEb4HCWE')
-    service_account_file = 'excelsheet-381920-4c0c0a0a6e7a.json'
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
     creds = None
     creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
     service = build('sheets', 'v4', credentials=creds)
@@ -311,26 +311,26 @@ def populate_googlesheet_with_collegteam_data() :
     college_team = {}
     teamObj=Team.objects.all()
     for x in teamObj:
-        print(x)
+        # print(x)
         if(x.leader.college_name in college_team.keys()):
             college_team[x.leader.college_name]+=1
         else:
             college_team[x.leader.college_name]=1
     
     for x in college_team.keys():
-        print(x)
+        # print(x)
         data.append([x,college_team[x]])
 
     sheet.values().clear(spreadsheetId=spreadsheet_id, range='A2:B').execute()
     sheet.values().append(
-        spreadsheetId=spreadsheet_id, range='COLLEGETEAMCOUNT!A2:B2', valueInputOption='USER_ENTERED', body={'values': data}
+        spreadsheetId=spreadsheet_id, range='COLLEGE-TEAMCOUNT!A2:B2', valueInputOption='USER_ENTERED', body={'values': data}
     ).execute()
     
 def populate_googlesheet_with_eventTeam_data() :
     """Populate Googlesheet with the coin data from the database."""
     scopes = ['https://www.googleapis.com/auth/spreadsheets']
-    spreadsheet_id = config('SPREADSHEET_ID', default='1cLNkflUYzDkkHg02qF1oQ3ons-T41g8E4JRKEb4HCWE')
-    service_account_file = 'excelsheet-381920-4c0c0a0a6e7a.json'
+    spreadsheet_id = config('SPREADSHEET_ID', default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
     creds = None
     creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=scopes)
     service = build('sheets', 'v4', credentials=creds)

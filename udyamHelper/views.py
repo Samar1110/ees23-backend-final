@@ -212,11 +212,11 @@ class TeamGetUserView(generics.ListAPIView):
             return Response(
                 {"error": "No such user exists"}, status=status.HTTP_404_NOT_FOUND
             )
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
 
 # bufferSize = 64 * 1024
 # password = config('SERVICE_ACCOUNT_DECRYPT_KEY')
-spreadsheet_id = config('SPREADSHEET_ID',default="1c2dfhdeDRaa-i369P6wvMVA8vWmsvuSn_zLlM01VxYc")
+# spreadsheet_id = config('SPREADSHEET_ID',default="1c2dfhdeDRaa-i369P6wvMVA8vWmsvuSn_zLlM01VxYc")
 
 # def decrypt_file(filename):
 #     with open(os.path.join(BASE_DIR, f"{filename}.aes"), "rb") as encrypted_file:
@@ -236,75 +236,75 @@ spreadsheet_id = config('SPREADSHEET_ID',default="1c2dfhdeDRaa-i369P6wvMVA8vWmsv
 #         with open(os.path.join(BASE_DIR, f"{filename}.aes"), "wb") as encrypted_file:
 #             pyAesCrypt.encryptStream(decrypted_file, encrypted_file, password, bufferSize)
             
-class UsersSheet:
-    SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+# class UsersSheet:
+#     SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
 
-    RANGE_NAME = 'Registration'
-    value_input_option = 'USER_ENTERED'
+#     RANGE_NAME = 'Registration'
+#     value_input_option = 'USER_ENTERED'
 
-    creds = None
+#     creds = None
        
-    service_account_file = 'excelsheet-381920-4c0c0a0a6e7a.json'
-    creds = None
-    creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=SCOPES)
-    service = build('sheets', 'v4', credentials=creds)
-    sheet = service.spreadsheets()
+#     service_account_file = 'excelsheet-381920-4c0c0a0a6e7a.json'
+#     creds = None
+#     creds = service_account.Credentials.from_service_account_file(service_account_file, scopes=SCOPES)
+#     service = build('sheets', 'v4', credentials=creds)
+#     sheet = service.spreadsheets()
 
-    @classmethod
-    def get_user_row(cls, user):
-        result = cls.sheet.values().get(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME).execute()
-        rows = result.get('values', [])
-        for i in  range(len(rows)):
-            if rows[i][1] == user.email:
-                return i+1
-        return len(rows)+1
+#     @classmethod
+#     def get_user_row(cls, user):
+#         result = cls.sheet.values().get(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME).execute()
+#         rows = result.get('values', [])
+#         for i in  range(len(rows)):
+#             if rows[i][1] == user.email:
+#                 return i+1
+#         return len(rows)+1
 
-    @classmethod
-    def get_user_data(cls,user):
-        row=[]
-        try:
-            row.append(user.name)
-            row.append(user.email)
-            row.append(user.year)
-            row.append(user.college_name)
-            row.append(user.radianite_points)
-        except:
-            for i in range(5): row.append("")
+#     @classmethod
+#     def get_user_data(cls,user):
+#         row=[]
+#         try:
+#             row.append(user.name)
+#             row.append(user.email)
+#             row.append(user.year)
+#             row.append(user.college_name)
+#             row.append(user.radianite_points)
+#         except:
+#             for i in range(5): row.append("")
 
-        row.append("Yes" if user.is_active else "No")
-        return row
+#         row.append("Yes" if user.is_active else "No")
+#         return row
 
-    @classmethod
-    def initialize_spreadsheet(cls):
-        values = []
-        for user in UserAcount.objects.all().order_by('id'):
-            values.append(cls.get_user_data(user))
+#     @classmethod
+#     def initialize_spreadsheet(cls):
+#         values = []
+#         for user in UserAcount.objects.all().order_by('id'):
+#             values.append(cls.get_user_data(user))
 
-        body = {
-            'values': values
-        }
-        result = cls.service.spreadsheets().values().clear(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME+"!A2:O10000").execute()
-        result = cls.service.spreadsheets().values().append(
-            spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME, valueInputOption=cls.value_input_option, body=body).execute()
+#         body = {
+#             'values': values
+#         }
+#         result = cls.service.spreadsheets().values().clear(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME+"!A2:O10000").execute()
+#         result = cls.service.spreadsheets().values().append(
+#             spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME, valueInputOption=cls.value_input_option, body=body).execute()
 
-    @classmethod
-    def update_user(cls, email):
-        user=UserAcount.objects.get(email=email)
-        row = cls.get_user_row(user)
-        values = [cls.get_user_data(user)]
-        body = {
-            'values': values
-        }
-        result = cls.service.spreadsheets().values().update(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME+f"!A{row}", valueInputOption=cls.value_input_option, body=body).execute()
+#     @classmethod
+#     def update_user(cls, email):
+#         user=UserAcount.objects.get(email=email)
+#         row = cls.get_user_row(user)
+#         values = [cls.get_user_data(user)]
+#         body = {
+#             'values': values
+#         }
+#         result = cls.service.spreadsheets().values().update(spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME+f"!A{row}", valueInputOption=cls.value_input_option, body=body).execute()
 
-    @classmethod
-    def new_user(cls, user):
-        values = [cls.get_user_data(user)]
-        body = {
-            'values': values
-        }
-        result = cls.service.spreadsheets().values().append(
-            spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME, valueInputOption=cls.value_input_option, body=body).execute()
+#     @classmethod
+#     def new_user(cls, user):
+#         values = [cls.get_user_data(user)]
+#         body = {
+#             'values': values
+#         }
+#         result = cls.service.spreadsheets().values().append(
+#             spreadsheetId=spreadsheet_id, range=cls.RANGE_NAME, valueInputOption=cls.value_input_option, body=body).execute()
 
 
 
