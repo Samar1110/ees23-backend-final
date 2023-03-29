@@ -25,6 +25,7 @@ from decouple import config
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from udyamHelper.models import Team, Event
+from django.core.validators import RegexValidator
 from rest_framework.decorators import api_view, renderer_classes
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
 
@@ -93,11 +94,18 @@ def user_referred(*, referral):
         user.update(radianite_points=user[0].radianite_points+5)
 
 class InputSerializer(serializers.Serializer):
+        
+        phone_message = 'Phone number must be entered in the format: 9XXXXXXXXX' 
+
+        phone_regex = RegexValidator(
+            regex=r'^[789]\d{9}$',
+            message=phone_message
+        )
         email = serializers.EmailField()
         name = serializers.CharField(required=True)
         college_name = serializers.CharField(required=True)
         year = serializers.CharField(required=True)
-        phone_number = serializers.CharField(required=True)
+        phone_number = serializers.CharField(validators=[phone_regex], max_length=60, required=True)
 
 class UserInitApi(generics.GenericAPIView):
     serializer_class=InputSerializer
@@ -120,6 +128,7 @@ class UserInitApi(generics.GenericAPIView):
         response = Response(data=user_get_me(user=UserAcount.objects.get(email=email)))
         return response
 
+
 class LogoutView(generics.GenericAPIView):
 
     permission_classes = (permissions.IsAuthenticated,)
@@ -129,6 +138,34 @@ class LogoutView(generics.GenericAPIView):
         request.user.auth_token.delete()
         logout(request)
         return Response(status=status.HTTP_200_OK)
+
+
+class UpdateApi(generics.GenericAPIView):
+
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = InputSerializer
+    def patch(self, request, id):
+        try:
+            user = UserAcount.objects.get(id=id)
+            serializer = self.serializer_class(data = request.data)
+            if not serializer.is_valid():
+                error = {}
+                for err in serializer.errors:
+                    error[err] = serializer.errors[err][0]
+                return Response(error, status=status.HTTP_409_CONFLICT)
+                
+            user.name = request.data['name']
+            user.college_name = request.data['college_name']
+            user.phone_number = request.data['phone_number']
+            user.year = request.data['year']
+            user.save()
+            return Response(
+                {"success": "User Account successfully updated"}, status=status.HTTP_200_OK
+            )
+        except UserAcount.DoesNotExist:
+            return Response(
+                {"error": "User account not found"}, status=status.HTTP_404_NOT_FOUND
+            )
 
   
 
