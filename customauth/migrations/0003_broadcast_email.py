@@ -6,23 +6,30 @@ import django.utils.timezone
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('customauth', '0002_alter_useracount_year'),
+        ("customauth", "0002_alter_useracount_year"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='BroadCast_Email',
+            name="BroadCast_Email",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('subject', models.CharField(max_length=200)),
-                ('created', models.DateTimeField(default=django.utils.timezone.now)),
-                ('message', ckeditor_uploader.fields.RichTextUploadingField()),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("subject", models.CharField(max_length=200)),
+                ("created", models.DateTimeField(default=django.utils.timezone.now)),
+                ("message", ckeditor_uploader.fields.RichTextUploadingField()),
             ],
             options={
-                'verbose_name': 'BroadCast Email to all Member',
-                'verbose_name_plural': 'BroadCast Email',
+                "verbose_name": "BroadCast Email to all Member",
+                "verbose_name_plural": "BroadCast Email",
             },
         ),
     ]

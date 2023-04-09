@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import* # TeamCreateView, ViewAllEvent,TeamCountView, GetAllNoticeView,TeamGetUserView
+from .views import *  # TeamCreateView, ViewAllEvent,TeamCountView, GetAllNoticeView,TeamGetUserView
 
 urlpatterns = [
     path("events/", ViewAllEvent.as_view(), name="get-all-events"),
@@ -8,5 +8,7 @@ urlpatterns = [
     path("updates/<str:event>", GetAllNoticeView.as_view(), name="notices"),
     path("teams/user/", TeamGetUserView.as_view(), name="teams-user"),
     path("team/<int:id>/", TeamView.as_view(), name="team"),
-    path("certificates/user", CertificateGetUserView.as_view(), name="certificates-user")
+    path(
+        "certificates/user", CertificateGetUserView.as_view(), name="certificates-user"
+    ),
 ]

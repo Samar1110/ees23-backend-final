@@ -11,10 +11,11 @@ from .models import UserAcount
 
 # Register your models here.
 from customauth.models import UserAcount
+
 admin.site.register(UserAcount)
 
 
-# Broadcasting Mail 
+# Broadcasting Mail
 class EmailThread(threading.Thread):
     def __init__(self, subject, html_content, recipient_list):
         self.subject = subject
@@ -42,15 +43,13 @@ class BroadCast_Email_Admin(admin.ModelAdmin):
     def submit_email(
         self, request, obj
     ):  # `obj` is queryset, so there we only use first selection, exacly obj[0]
-
-
         list_email_user = [
             p.email for p in UserAcount.objects.all()
         ]  #: if p.email != settings.EMAIL_HOST_USER   #this for exception
         obj_selected = obj[0]
         n = 100
         list_group = [
-            list_email_user[i: i + n] for i in range(0, len(list_email_user), n)
+            list_email_user[i : i + n] for i in range(0, len(list_email_user), n)
         ]
         for group in list_group:
             EmailThread(
@@ -69,4 +68,3 @@ class BroadCast_Email_Admin(admin.ModelAdmin):
 
 
 admin.site.register(BroadCast_Email, BroadCast_Email_Admin)
-

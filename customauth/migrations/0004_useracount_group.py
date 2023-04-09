@@ -5,16 +5,20 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
-        ('customauth', '0003_broadcast_email'),
+        ("auth", "0012_alter_user_first_name_max_length"),
+        ("customauth", "0003_broadcast_email"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='useracount',
-            name='group',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='auth.group'),
+            model_name="useracount",
+            name="group",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.CASCADE,
+                to="auth.group",
+            ),
         ),
     ]

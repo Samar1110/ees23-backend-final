@@ -21,11 +21,15 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('broadcastMail', TemplateView.as_view(template_name='broadcastMail.html'), name='broadcastMail'),
+    path("admin/", admin.site.urls),
+    path(
+        "broadcastMail",
+        TemplateView.as_view(template_name="broadcastMail.html"),
+        name="broadcastMail",
+    ),
     path("auth/", include("customauth.urls")),
-    path('api/', include("udyamHelper.urls")),
-    path(r'^ckeditor/', include('ckeditor_uploader.urls')),
+    path("api/", include("udyamHelper.urls")),
+    path(r"^ckeditor/", include("ckeditor_uploader.urls")),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 if settings.DEBUG:
@@ -47,4 +51,3 @@ if settings.DEBUG:
     ]
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-

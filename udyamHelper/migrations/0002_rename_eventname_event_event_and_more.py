@@ -4,20 +4,19 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('udyamHelper', '0001_initial'),
+        ("udyamHelper", "0001_initial"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='event',
-            old_name='eventname',
-            new_name='event',
+            model_name="event",
+            old_name="eventname",
+            new_name="event",
         ),
         migrations.RenameField(
-            model_name='team',
-            old_name='eventname',
-            new_name='event',
+            model_name="team",
+            old_name="eventname",
+            new_name="event",
         ),
     ]

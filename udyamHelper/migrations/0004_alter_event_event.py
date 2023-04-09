@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('udyamHelper', '0003_noticeboard'),
+        ("udyamHelper", "0003_noticeboard"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='event',
-            name='event',
+            model_name="event",
+            name="event",
             field=models.CharField(max_length=100),
         ),
     ]

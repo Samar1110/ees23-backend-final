@@ -4,21 +4,38 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('udyamHelper', '0002_rename_eventname_event_event_and_more'),
+        ("udyamHelper", "0002_rename_eventname_event_event_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='NoticeBoard',
+            name="NoticeBoard",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('title', models.TextField(unique=True)),
-                ('description', models.TextField()),
-                ('date', models.DateField(auto_now=True)),
-                ('link', models.TextField()),
-                ('event', models.CharField(choices=[('Mashal', 'Mashal'), ('Udgam', 'Udgam'), ('Udyam', 'Udyam')], max_length=20)),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("title", models.TextField(unique=True)),
+                ("description", models.TextField()),
+                ("date", models.DateField(auto_now=True)),
+                ("link", models.TextField()),
+                (
+                    "event",
+                    models.CharField(
+                        choices=[
+                            ("Mashal", "Mashal"),
+                            ("Udgam", "Udgam"),
+                            ("Udyam", "Udyam"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
             ],
         ),
     ]

@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('customauth', '0002_alter_useracount_year'),
+        ("customauth", "0002_alter_useracount_year"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='useracount',
-            name='radianite_points',
+            model_name="useracount",
+            name="radianite_points",
             field=models.BigIntegerField(blank=True, default=0, null=True),
         ),
     ]

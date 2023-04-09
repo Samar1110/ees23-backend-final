@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('customauth', '0003_useracount_radianite_points'),
-        ('customauth', '0004_useracount_group'),
+        ("customauth", "0003_useracount_radianite_points"),
+        ("customauth", "0004_useracount_group"),
     ]
 
-    operations = [
-    ]
+    operations = []

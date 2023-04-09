@@ -4,20 +4,19 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('udyamHelper', '0004_alter_event_event'),
+        ("udyamHelper", "0004_alter_event_event"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='event',
-            name='event',
+            model_name="event",
+            name="event",
             field=models.CharField(max_length=100, unique=True),
         ),
         migrations.AlterField(
-            model_name='team',
-            name='teamname',
+            model_name="team",
+            name="teamname",
             field=models.CharField(max_length=50),
         ),
     ]
