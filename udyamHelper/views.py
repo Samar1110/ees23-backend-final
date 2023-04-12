@@ -523,12 +523,14 @@ class CertificateGetUserView(generics.GenericAPIView):
 
     def get(self, request):
         print(request.user.email)
-        zip_file = createCerti(request.user.email)
-        response = HttpResponse(FileWrapper(zip_file), content_type="application/zip")
-        response["Content-Disposition"] = (
-            'attachment; filename="%s"' % "certificates.zip"
-        )
-        os.remove("static/certificates.zip")
-        shutil.rmtree("static/certificates")
-        return response
-
+        try:
+            zip_file = createCerti(request.user.email)
+            response = HttpResponse(FileWrapper(zip_file), content_type="application/zip")
+            response["Content-Disposition"] = (
+                'attachment; filename="%s"' % "certificates.zip"
+            )
+            os.remove("static/certificates.zip")
+            shutil.rmtree("static/certificates")
+            return response
+        except:
+            return Response({"error": "Please Try Again"}, status=status.HTTP_404_NOT_FOUND)
