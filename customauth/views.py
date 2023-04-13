@@ -252,7 +252,7 @@ def populate_googlesheet_with_user_data():
             ]
         )
 
-    sheet.values().clear(spreadsheetId=spreadsheet_id, range="A2:F").execute()
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range="USERDATA!A2:F").execute()
     sheet.values().append(
         spreadsheetId=spreadsheet_id,
         range="USERDATA!A2:F2",
@@ -293,7 +293,7 @@ def populate_googlesheet_with_team_data():
             ]
         )
 
-    sheet.values().clear(spreadsheetId=spreadsheet_id, range="A2:K").execute()
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range="TEAMDATA!A2:K").execute()
     sheet.values().append(
         spreadsheetId=spreadsheet_id,
         range="TEAMDATA!A2:K2",
@@ -328,7 +328,7 @@ def populate_googlesheet_with_collegteam_data():
         # print(x)
         data.append([x, college_team[x]])
 
-    sheet.values().clear(spreadsheetId=spreadsheet_id, range="A2:B").execute()
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range="COLLEGE-TEAMCOUNT!A2:B").execute()
     sheet.values().append(
         spreadsheetId=spreadsheet_id,
         range="COLLEGE-TEAMCOUNT!A2:B2",
@@ -353,7 +353,7 @@ def populate_googlesheet_with_eventTeam_data():
     for event in Event.objects.all():
         data.append([event.event, Team.objects.filter(event=event).count()])
 
-    sheet.values().clear(spreadsheetId=spreadsheet_id, range="A2:B").execute()
+    sheet.values().clear(spreadsheetId=spreadsheet_id, range="EVENT-TEAMCOUNT!A2:B").execute()
     sheet.values().append(
         spreadsheetId=spreadsheet_id,
         range="EVENT-TEAMCOUNT!A2:B2",
