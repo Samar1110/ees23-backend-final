@@ -4,11 +4,9 @@ from .serializers import EventSerializer, TeamSerializer, NoticeBoardSerializer,
 from customauth.models import UserAcount
 from rest_framework import serializers, generics, permissions, status
 from rest_framework import permissions
-import pandas as pd
 import shutil
 from django.http import HttpResponse
 from PIL import ImageDraw, Image, ImageFont
-from wsgiref.util import FileWrapper
 import os
 from customauth.models import UserAcount
 from customauth.views import (
@@ -527,7 +525,7 @@ class CertificateGetUserView(generics.GenericAPIView):
         # print(request.user.email)
         # try:
             zip_file = createCerti(request.user.email)
-            response = HttpResponse(FileWrapper(zip_file), content_type="application/zip")
+            response = HttpResponse(zip_file, content_type="application/zip")
             response["Content-Disposition"] = (
                 'attachment; filename="%s"' % "certificates.zip"
             )
