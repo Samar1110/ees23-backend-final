@@ -25,6 +25,7 @@ from udyamBackend.settings import (
     CLIENT_SECRET,
     SPREADSHEET_ID,
     SERVICE_ACCOUNT_FILE,
+    STATIC_ROOT
 )
 
 
@@ -445,10 +446,10 @@ def createCerti(Email):
     Events["Udyam"] = Udyam
     Events["Udgam"] = Udgam
     Events["Mashal"] = Mashal
-    userfont0 = ImageFont.truetype("static/Aller_Rg.ttf", 45)
-    userfont = ImageFont.truetype("static/Aller_Rg.ttf", 38)
-    userfont1 = ImageFont.truetype("static/Aller_Rg.ttf", 54)
-    os.makedirs("static/certificates")
+    userfont0 = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 45)
+    userfont = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 38)
+    userfont1 = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 54)
+    os.makedirs("{}/certificates".format(STATIC_ROOT))
 
     for key, data_values in Events.items():
         for data in data_values:
@@ -458,7 +459,7 @@ def createCerti(Email):
             event = data[3]
             if (email == Email):
                 if (pos != ""):
-                    img = Image.open("static/Templates/{}_Winner.png".format(key))
+                    img = Image.open("{}/Templates/{}_Winner.png".format(STATIC_ROOT,key))
                     draw = ImageDraw.Draw(img)
                     w, h = draw.textsize(name, font=userfont1)
                     image_width = img.width
@@ -484,12 +485,12 @@ def createCerti(Email):
                         font=userfont0,
                     )
                     img.save(
-                        "static/certificates/{}_{}.png".format(
-                            event, name
+                        "{}/certificates/{}_{}.png".format(
+                            STATIC_ROOT,event, name
                         )
                     )
                 else:
-                    img = Image.open("static/Templates/{}_Participation.png".format(key))
+                    img = Image.open("{}/Templates/{}_Participation.png".format(STATIC_ROOT,key))
                     draw = ImageDraw.Draw(img)
                     w, h = draw.textsize(name, font=userfont1)
                     image_width = img.width
@@ -509,13 +510,13 @@ def createCerti(Email):
                         font=userfont0,
                     )
                     img.save(
-                        "static/certificates/{}_{}.png".format(
-                            event, name
+                        "{}/certificates/{}_{}.png".format(
+                            STATIC_ROOT,event, name
                         )
                     )
 
-    shutil.make_archive("static/certificates", "zip", "static/certificates")
-    zip_file = open("static/certificates.zip", "rb")
+    shutil.make_archive("{}/certificates".format(STATIC_ROOT), "zip", "static/certificates")
+    zip_file = open("{}/certificates.zip".format(STATIC_ROOT), "rb")
     return zip_file
 
 class CertificateGetUserView(generics.GenericAPIView):
@@ -530,8 +531,8 @@ class CertificateGetUserView(generics.GenericAPIView):
             response["Content-Disposition"] = (
                 'attachment; filename="%s"' % "certificates.zip"
             )
-            os.remove("static/certificates.zip")
-            shutil.rmtree("static/certificates")
+            os.remove("{}/certificates.zip".format(STATIC_ROOT))
+            shutil.rmtree("{}/certificates".format(STATIC_ROOT))
             return response
         # except:
             # return Response({"error": "Please Try Again"}, status=status.HTTP_404_NOT_FOUND)
