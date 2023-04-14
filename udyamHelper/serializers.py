@@ -51,3 +51,8 @@ class NoticeBoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = NoticeBoard
         fields = "__all__"
+
+class CertificateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserAcount
+        fields = ""

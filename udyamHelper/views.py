@@ -1,6 +1,6 @@
 from .models import Team, Event, NoticeBoard
 from rest_framework.response import Response
-from .serializers import EventSerializer, TeamSerializer, NoticeBoardSerializer
+from .serializers import EventSerializer, TeamSerializer, NoticeBoardSerializer, CertificateSerializer
 from customauth.models import UserAcount
 from rest_framework import serializers, generics, permissions, status
 from rest_framework import permissions
@@ -415,7 +415,7 @@ class TeamView(generics.GenericAPIView):
         return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
-def createCerti(email):
+def createCerti(Email):
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     spreadsheet_id = config("SPREADSHEET_ID", default=SPREADSHEET_ID)
     service_account_file = SERVICE_ACCOUNT_FILE
@@ -456,7 +456,7 @@ def createCerti(email):
             email = data[1]
             pos = data[2]
             event = data[3]
-            if (email == email):
+            if (email == Email):
                 if (pos != ""):
                     img = Image.open("static/Templates/{}_Winner.png".format(key))
                     draw = ImageDraw.Draw(img)
@@ -520,6 +520,7 @@ def createCerti(email):
 
 class CertificateGetUserView(generics.GenericAPIView):
     permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = CertificateSerializer
 
     def get(self, request):
         print(request.user.email)
