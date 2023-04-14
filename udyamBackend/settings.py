@@ -143,6 +143,9 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 BASE_URL_FRONTEND = os.environ.get("BASE_URL_FRONTEND")
 SPREADSHEET_ID = os.environ.get("SPREADSHEET_ID")
 SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE")
+UDYAMID = os.environ.get("UDYAMID")
+UDGAMID = os.environ.get("UDGAMID")
+MASHALID = os.environ.get("MASHALID")
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"

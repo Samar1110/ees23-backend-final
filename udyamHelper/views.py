@@ -17,10 +17,12 @@ from customauth.views import (
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from decouple import config
+import qrcode  
 
 from udyamBackend.settings import (
-    CLIENT_ID,
-    CLIENT_SECRET,
+    UDGAMID,
+    UDYAMID,
+    MASHALID,
     SPREADSHEET_ID,
     SERVICE_ACCOUNT_FILE,
     STATIC_ROOT
@@ -426,17 +428,17 @@ def createCerti(Email):
     sheet = service.spreadsheets()
     udyam = sheet.values().get(
         spreadsheetId=spreadsheet_id,
-        range="UDYAM-CERTIFICATES!A2:D1000"
+        range="UDYAM-CERTIFICATES!A2:E1000"
     ).execute()
     Udyam = list(udyam.values())[2]
     udgam = sheet.values().get(
         spreadsheetId=spreadsheet_id,
-        range="UDGAM-CERTIFICATES!A2:D1000"
+        range="UDGAM-CERTIFICATES!A2:E1000"
     ).execute()
     Udgam = list(udgam.values())[2]
     mashal = sheet.values().get(
         spreadsheetId=spreadsheet_id,
-        range="MASHAL-CERTIFICATES!A2:D1000"
+        range="MASHAL-CERTIFICATES!A2:E1000"
     ).execute()
     Mashal = list(mashal.values())[2]
 
@@ -455,9 +457,15 @@ def createCerti(Email):
             email = data[1]
             pos = data[2]
             event = data[3]
+            qrtext = "https://ees23.pythonanywhere.com/api/verify/{}".format(data[4])
             if (email == Email):
+                qr = qrcode.QRCode(box_size=5)
+                qr.add_data(qrtext)
+                qr.make()
+                qr_img = qr.make_image()
                 if (pos != ""):
                     img = Image.open("{}/Templates/{}_Winner.png".format(STATIC_ROOT,key))
+                    img.paste(qr_img,[336,670])
                     draw = ImageDraw.Draw(img)
                     w, h = draw.textsize(name, font=userfont1)
                     image_width = img.width
@@ -489,6 +497,7 @@ def createCerti(Email):
                     )
                 else:
                     img = Image.open("{}/Templates/{}_Participation.png".format(STATIC_ROOT,key))
+                    img.paste(qr_img,[336,670])
                     draw = ImageDraw.Draw(img)
                     w, h = draw.textsize(name, font=userfont1)
                     image_width = img.width
@@ -534,3 +543,39 @@ class CertificateGetUserView(generics.GenericAPIView):
             return response
         except:
             return Response({"error": "Please Try Again"}, status=status.HTTP_404_NOT_FOUND)
+
+
+def CertificateVerify(request, id):
+    if request.method == "GET":
+        scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+        spreadsheet_id = config("SPREADSHEET_ID", default=SPREADSHEET_ID)
+        service_account_file = SERVICE_ACCOUNT_FILE
+        creds = None
+        creds = service_account.Credentials.from_service_account_file(
+            service_account_file, scopes=scopes
+        )
+        service = build("sheets", "v4", credentials=creds)
+        sheet = service.spreadsheets()
+        ids = [UDYAMID, UDGAMID, MASHALID]
+        events = ["UDYAM", "UDGAM", "MASHAL"]
+        for i in range(3):
+            if id[:6] == ids[i]:
+                data = sheet.values().get(
+                    spreadsheetId=spreadsheet_id,
+                    range="{}-CERTIFICATES!A2:E1000".format(events[i])
+                ).execute()
+                Data = list(data.values())[2]
+                for data in Data:
+                    name = data[0]
+                    pos = data[2]
+                    event = data[3]
+                    userid = data[4]
+                    if userid == id:
+                        content = "This certificate is proudly presented to {} for ".format(name)
+                        content += ("participating in " if pos=="" else " securing {} position in ".format(pos))
+                        content += "{} held under {}'23, EES IIT BHU!".format(event, events[i])
+                        content = "<html><body><h2>"+content+"</h2></body></html>"
+                        return HttpResponse(content=content)
+        content = "<html><body><h2>Invalid Certificate!</h2></body></html>"
+        return HttpResponse(content=content)
+    return HttpResponse("Invalid request")
