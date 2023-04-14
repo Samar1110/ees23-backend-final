@@ -31,8 +31,8 @@ GOOGLE_ID_TOKEN_INFO_URL = "https://oauth2.googleapis.com/tokeninfo"
 
 def google_validate(*, code: str) -> bool:
     redirect_uri = "https://eesiitbhu.in"
-    print(CLIENT_ID)
-    print(CLIENT_SECRET)
+    # print(CLIENT_ID)
+    # print(CLIENT_SECRET)
     try:
         access_token = google_get_access_token(code=code, redirect_uri=redirect_uri)
     except:
@@ -49,7 +49,7 @@ def google_validate(*, code: str) -> bool:
 def user_create(email, **extra_field) -> UserAcount:
     extra_fields = {"is_staff": False, "is_active": True, **extra_field}
 
-    print(extra_fields)
+    # print(extra_fields)
 
     user = UserAcount(email=email, **extra_fields)
     user.save()
@@ -211,7 +211,7 @@ def index(request):
     if request.method == "POST" and request.user.has_perm("view_broadcast_email"):
         form = PostForm(request.POST)
         if form.is_valid():
-            print(subject)
+            # print(subject)
             form.save()
             subject = request.POST["subject"]
             created = request.POST["created"]
