@@ -515,7 +515,7 @@ def createCerti(Email):
                         )
                     )
 
-    shutil.make_archive("{}/certificates".format(STATIC_ROOT), "zip", "static/certificates")
+    shutil.make_archive("{}/certificates".format(STATIC_ROOT), "zip", "{}/certificates".format(STATIC_ROOT))
     zip_file = open("{}/certificates.zip".format(STATIC_ROOT), "rb")
     return zip_file
 
