@@ -18,6 +18,7 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from decouple import config
 import qrcode  
+from django.shortcuts import render
 
 from udyamBackend.settings import (
     UDGAMID,
@@ -574,8 +575,6 @@ def CertificateVerify(request, id):
                         content = "This certificate is proudly presented to {} for ".format(name)
                         content += ("participating in " if pos=="" else " securing {} position in ".format(pos))
                         content += "{} held under {}'23, EES IIT BHU!".format(event, events[i])
-                        content = "<html><body><h2>"+content+"</h2></body></html>"
-                        return HttpResponse(content=content)
-        content = "<html><body><h2>Invalid Certificate!</h2></body></html>"
-        return HttpResponse(content=content)
-    return HttpResponse("Invalid request")
+                        return render(request, "verify.html", {"bg": "success", "content": content})
+        return render(request, "verify.html", {"bg": "danger", "content": "Invalid Certificate!"})
+    return render(request, "verify.html", {"bg": "danger", "content": "Invalid Request!"})
