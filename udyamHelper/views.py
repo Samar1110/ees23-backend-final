@@ -527,7 +527,7 @@ def createCerti(Email):
     L = [
         "You've got {} certificate from the Electronics Engineering Society.\n".format(count),
         "This zip incorporates the certificates from all the events of Udyam, Udgam, and Mashal!\n\n",
-        "Please note that details of all the participants who qualified for certificates are given by event coordinators. For any inconsistency reaching them. "
+        "Please note that details of all the participants who qualified for certificates are given by event coordinators. For any inconsistency try reaching them. "
         ]
     file1.writelines(L)
     file1.close()
