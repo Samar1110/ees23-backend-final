@@ -451,7 +451,7 @@ def createCerti(Email):
     userfont = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 38)
     userfont1 = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 54)
     os.makedirs("{}/certificates".format(STATIC_ROOT))
-
+    count=0
     for key, data_values in Events.items():
         for data in data_values:
             name = data[0]
@@ -460,6 +460,7 @@ def createCerti(Email):
             event = data[3]
             qrtext = "https://ees23.pythonanywhere.com/api/verify/{}".format(data[4])
             if (email == Email):
+                count+=1
                 qr = qrcode.QRCode(box_size=5)
                 qr.add_data(qrtext)
                 qr.make()
@@ -522,7 +523,14 @@ def createCerti(Email):
                             STATIC_ROOT,event, name
                         )
                     )
-
+    file1 = open("{}/certificates/readme.txt".format(STATIC_ROOT), "a")
+    L = [
+        "You've got {} certificate from the Electronics Engineering Society.\n".format(count),
+        "This zip incorporates the certificates from all the events of Udyam, Udgam, and Mashal!\n\n",
+        "Please note that details of all the participants who qualified for certificates are given by event coordinators. For any inconsistency reaching them. "
+        ]
+    file1.writelines(L)
+    file1.close()
     shutil.make_archive("{}/certificates".format(STATIC_ROOT), "zip", "{}/certificates".format(STATIC_ROOT))
     zip_file = open("{}/certificates.zip".format(STATIC_ROOT), "rb")
     return zip_file
