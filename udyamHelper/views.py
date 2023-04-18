@@ -532,8 +532,8 @@ class CertificateGetUserView(generics.GenericAPIView):
     serializer_class = CertificateSerializer
 
     def get(self, request):
-        print(request.user.email)
-        try:
+        # print(request.user.email)
+        # try:
             zip_file = createCerti(request.user.email)
             response = HttpResponse(zip_file, content_type="application/zip")
             response["Content-Disposition"] = (
@@ -542,8 +542,8 @@ class CertificateGetUserView(generics.GenericAPIView):
             os.remove("{}/certificates.zip".format(STATIC_ROOT))
             shutil.rmtree("{}/certificates".format(STATIC_ROOT))
             return response
-        except:
-            return Response({"error": "Please Try Again"}, status=status.HTTP_404_NOT_FOUND)
+        # except:
+            # return Response({"error": "Please Try Again"}, status=status.HTTP_404_NOT_FOUND)
 
 
 def CertificateVerify(request, id):
