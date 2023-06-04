@@ -663,8 +663,8 @@ def CertificateVerify(request, id):
                 userid = data[3]
                 if userid == id:
                     content = "This certificate is proudly presented to {} for ".format(name)
-                    content += ("successfully organizing EES Fest'23 help by Electronics Engineering Society")
-                    content += "from 7th-9th April,2023 in the capacity of {}.".format(designation)
+                    content += ("successfully organizing EES Fest '23 held by Electronics Engineering Society ")
+                    content += "from 7th-9th April, 2023 in the capacity of {}.".format(designation)
                     return render(request, "verify.html", {"bg": "success", "content": content})
         return render(request, "verify.html", {"bg": "danger", "content": "Invalid Certificate!"})
     return render(request, "verify.html", {"bg": "danger", "content": "Invalid Request!"})
