@@ -24,6 +24,7 @@ from udyamBackend.settings import (
     UDGAMID,
     UDYAMID,
     MASHALID,
+    EESID,
     SPREADSHEET_ID,
     SERVICE_ACCOUNT_FILE,
     STATIC_ROOT
@@ -416,6 +417,63 @@ class TeamView(generics.GenericAPIView):
             )
         return Response({"error": "Team not found"}, status=status.HTTP_404_NOT_FOUND)
 
+def getPORS(Email):
+    scopes = ["https://www.googleapis.com/auth/spreadsheets"]
+    spreadsheet_id = config("SPREADSHEET_ID", default=SPREADSHEET_ID)
+    service_account_file = SERVICE_ACCOUNT_FILE
+    creds = None
+    creds = service_account.Credentials.from_service_account_file(
+        service_account_file, scopes=scopes
+    )
+    service = build("sheets", "v4", credentials=creds)
+    sheet = service.spreadsheets()
+    ees = sheet.values().get(
+        spreadsheetId=spreadsheet_id,
+        range="EES-PORS!A2:E1000"
+    ).execute()
+    EES = list(ees.values())[2]
+    userfont0 = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 45)
+    userfont = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 38)
+    userfont1 = ImageFont.truetype("{}/Aller_Rg.ttf".format(STATIC_ROOT), 54)
+    count = 0
+    for porData in EES:
+        name = porData[0]
+        email = porData[1]
+        designation = porData[2]
+        qrtext = "https://ees23.pythonanywhere.com/api/verify/{}".format(porData[3])
+        if (email == Email):
+            count+=1
+            qr = qrcode.QRCode(box_size=5)
+            qr.add_data(qrtext)
+            qr.make()
+            qr_img = qr.make_image()
+            img = Image.open("{}/Templates/EES_POR.png".format(STATIC_ROOT))
+            img.paste(qr_img,[336,670])
+            draw = ImageDraw.Draw(img)
+            w, h = draw.textsize(name, font=userfont1)
+            image_width = img.width
+            W = 840
+            H = 1030
+            coords = ((image_width - w) / 2, H)
+            draw.text(
+                xy=coords,
+                text="{}".format(name),
+                fill=(0, 0, 0),
+                font=userfont1,
+            )
+            draw.text(
+                xy=(1180, 1280),
+                text="{}".format(designation),
+                fill=(0, 0, 0),
+                font=userfont0,
+            )
+            img.save(
+                "{}/certificates/{}_{}.png".format(
+                    STATIC_ROOT,designation, name
+                )
+            )
+    return count
+
 
 def createCerti(Email):
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -523,6 +581,7 @@ def createCerti(Email):
                             STATIC_ROOT,event, name
                         )
                     )
+    count+=getPORS(Email)
     file1 = open("{}/certificates/readme.txt".format(STATIC_ROOT), "a")
     L = [
         "You've got {} certificate from the Electronics Engineering Society.\n".format(count),
@@ -553,7 +612,10 @@ class CertificateGetUserView(generics.GenericAPIView):
         except:
             if os.path.exists("{}/certificates".format(STATIC_ROOT)):
                 shutil.rmtree("{}/certificates".format(STATIC_ROOT))
-                os.remove("{}/certificates.zip".format(STATIC_ROOT))
+                try:
+                    os.remove("{}/certificates.zip".format(STATIC_ROOT))
+                except:
+                    return Response({"error": "Unknown Error Occurred"}, status=status.HTTP_404_NOT_FOUND)
             return Response({"error": "Please Try Again"}, status=status.HTTP_404_NOT_FOUND)
 
 
@@ -587,5 +649,22 @@ def CertificateVerify(request, id):
                         content += ("participating in " if pos=="" else " securing {} position in ".format(pos))
                         content += "{} held under {}'23, EES IIT BHU!".format(event, events[i])
                         return render(request, "verify.html", {"bg": "success", "content": content})
+        # Verify POR
+        print(EESID)
+        if id[:7] == EESID:
+            data = sheet.values().get(
+                spreadsheetId=spreadsheet_id,
+                range="EES-PORS!A2:E1000"
+            ).execute()
+            Data = list(data.values())[2]
+            for data in Data:
+                name = data[0]
+                designation = data[2]
+                userid = data[3]
+                if userid == id:
+                    content = "This certificate is proudly presented to {} for ".format(name)
+                    content += ("successfully organizing EES Fest'23 help by Electronics Engineering Society")
+                    content += "from 7th-9th April,2023 in the capacity of {}.".format(designation)
+                    return render(request, "verify.html", {"bg": "success", "content": content})
         return render(request, "verify.html", {"bg": "danger", "content": "Invalid Certificate!"})
     return render(request, "verify.html", {"bg": "danger", "content": "Invalid Request!"})

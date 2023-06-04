@@ -146,6 +146,7 @@ SERVICE_ACCOUNT_FILE = os.environ.get("SERVICE_ACCOUNT_FILE")
 UDYAMID = os.environ.get("UDYAMID")
 UDGAMID = os.environ.get("UDGAMID")
 MASHALID = os.environ.get("MASHALID")
+EESID = os.environ.get("EESID")
 
 
 CKEDITOR_UPLOAD_PATH = "uploads/"
