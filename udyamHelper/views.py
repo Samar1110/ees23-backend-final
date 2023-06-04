@@ -609,8 +609,7 @@ class CertificateGetUserView(generics.GenericAPIView):
             os.remove("{}/certificates.zip".format(STATIC_ROOT))
             shutil.rmtree("{}/certificates".format(STATIC_ROOT))
             return response
-        except KeyError as e:
-            print(e)
+        except:
             if os.path.exists("{}/certificates".format(STATIC_ROOT)):
                 shutil.rmtree("{}/certificates".format(STATIC_ROOT))
                 try:
