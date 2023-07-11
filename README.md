@@ -1,4 +1,4 @@
-# ees33-backend
+# ees23-backend
 Repository for backend of EES 23 website 
 
 For starting the project first time :
